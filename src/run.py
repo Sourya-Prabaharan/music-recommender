@@ -1,15 +1,16 @@
 from music_recommender import MusicRecommender
 
-rec = MusicRecommender()
+# use your Spotify data file
+rec = MusicRecommender(data_path="data/spotify_tracks.csv")
 rec.build_matrices()
 rec.train_cf()
 
-print("CF recommendations:")
+print("🎵 Collaborative-filtering recommendations:")
 print(rec.recommend_cf(user_id=1))
 
-print("\nContent recommendations:")
-print(rec.recommend_content("Viva La Vida"))
+print("\n🎶 Content-based recommendations:")
+print(rec.recommend_content("Shameless"))
 
-print("\nHybrid recommendations:")
-print(rec.hybrid_recommend(user_id=1, song_name="Viva La Vida"))
+print("\n💡 Hybrid recommendations:")
+print(rec.hybrid_recommend(user_id=1, song_name="Shameless"))
 

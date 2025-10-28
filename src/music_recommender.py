@@ -7,20 +7,25 @@ from sklearn.metrics.pairwise import cosine_similarity
 class MusicRecommender:
     def __init__(self, data_path="data/songs.csv"):
         self.df = pd.read_csv(data_path)
-        self.user_map = {u:i for i,u in enumerate(self.df['user_id'].unique())}
-        self.item_map = {s:i for i,s in enumerate(self.df['song_id'].unique())}
+
+        # if user_id not present, create a single user
+        if "user_id" not in self.df.columns:
+            self.df["user_id"] = 1
+
+        self.user_map = {u:i for i,u in enumerate(self.df["user_id"].unique())}
+        self.item_map = {s:i for i,s in enumerate(self.df["song_name"].unique())}
         self.inv_user = {v:k for k,v in self.user_map.items()}
         self.inv_item = {v:k for k,v in self.item_map.items()}
         self.model = None
         self.content_sim = None
 
     def build_matrices(self):
-        rows = self.df['user_id'].map(self.user_map)
-        cols = self.df['song_id'].map(self.item_map)
-        data = self.df['play_count']
+        rows = self.df["user_id"].map(self.user_map)
+        cols = self.df["song_name"].map(self.item_map)
+        data = np.ones(len(self.df))  # treat each listen as 1
         self.user_item = sp.csr_matrix((data, (rows, cols)))
 
-        features = self.df[['danceability','energy','valence','tempo']].values
+        features = self.df[["danceability", "energy", "valence", "tempo"]].values
         self.content_sim = cosine_similarity(features)
 
     def train_cf(self, factors=32):
@@ -29,10 +34,13 @@ class MusicRecommender:
         self.model = model
 
     def recommend_cf(self, user_id, n=5):
+        """Recommend songs for a user using collaborative filtering."""
         uid = self.user_map[user_id]
         ids, scores = self.model.recommend(uid, self.user_item[uid], N=n)
-        recs = self.df[self.df['song_id'].isin([self.inv_item[i] for i in ids])]
-        return recs[['artist','song_name']]
+        # match by song_name instead of song_id
+        recommended_names = [self.inv_item[i] for i in ids]
+        recs = self.df[self.df["song_name"].isin(recommended_names)]
+        return recs[["artist", "song_name"]].drop_duplicates()
 
     def recommend_content(self, song_name, n=5):
         idx = self.df[self.df['song_name'] == song_name].index[0]
