@@ -1,0 +1,8 @@
+pandas
+numpy
+scikit-learn
+implicit
+spotipy
+streamlit
+fastapi
+uvicorn

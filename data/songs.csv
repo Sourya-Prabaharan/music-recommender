@@ -1,0 +1,6 @@
+user_id,song_id,artist,song_name,play_count,danceability,energy,valence,tempo
+1,10,Coldplay,Viva La Vida,20,0.45,0.78,0.52,138
+1,20,Imagine Dragons,Believer,15,0.62,0.85,0.48,125
+2,10,Coldplay,Viva La Vida,5,0.45,0.78,0.52,138
+2,30,Ed Sheeran,Perfect,30,0.61,0.59,0.67,95
+
