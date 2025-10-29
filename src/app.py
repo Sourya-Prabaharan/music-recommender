@@ -9,7 +9,7 @@ st.write("Find songs similar to your favorites using real Spotify data!")
 # ⚡ Cache dataset loading for faster startup
 @st.cache_data
 def load_recommender():
-    rec = MusicRecommender(data_path="data/spotify_large.csv")
+    rec = MusicRecommender(data_path="data/spotify_sample.csv")
     rec.build_matrices()
     rec.train_cf()
     return rec
