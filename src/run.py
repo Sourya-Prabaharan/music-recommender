@@ -1,16 +1,9 @@
+"""Run a catalog-only example without training collaborative filtering."""
+from pathlib import Path
 from music_recommender import MusicRecommender
 
-# use your Spotify data file
-rec = MusicRecommender(data_path="data/spotify_tracks.csv")
+rec = MusicRecommender(Path(__file__).resolve().parents[1] / "data/spotify_sample.csv")
 rec.build_matrices()
-rec.train_cf()
-
-print("🎵 Collaborative-filtering recommendations:")
-print(rec.recommend_cf(user_id=1))
-
-print("\n🎶 Content-based recommendations:")
-print(rec.recommend_content("Shameless"))
-
-print("\n💡 Hybrid recommendations:")
-print(rec.hybrid_recommend(user_id=1, song_name="Shameless"))
-
+seed = rec.df.iloc[0]
+print(f"Tracks similar to {seed.song_name} by {seed.artist}:")
+print(rec.recommend_content(seed.song_name, artist=seed.artist).to_string(index=False))
