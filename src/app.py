@@ -1,37 +1,24 @@
+from pathlib import Path
+
 import streamlit as st
-import pandas as pd
 from music_recommender import MusicRecommender
 
-st.set_page_config(page_title="Music Recommender", page_icon="🎧", layout="wide")
-st.title("🎧 Your Personal Music Recommender")
-st.write("Find songs similar to your favorites using real Spotify data!")
+st.set_page_config(page_title="Music Discovery", page_icon="🎧", layout="wide")
+st.title("🎧 Content-based Music Discovery")
+st.write("Explore tracks with similar audio features. No listening history or user personalization is used.")
 
-# ⚡ Cache dataset loading for faster startup
-@st.cache_data
+
+@st.cache_resource
 def load_recommender():
-    rec = MusicRecommender(data_path="data/spotify_sample.csv")
+    rec = MusicRecommender(Path(__file__).resolve().parents[1] / "data/spotify_sample.csv")
     rec.build_matrices()
-    rec.train_cf()
     return rec
 
-with st.spinner("Loading recommender model..."):
-    rec = load_recommender()
-st.success("Model ready!")
 
-# 🎵 Load song list
-song_list = rec.df["song_name"].unique().tolist()
-
-# 🔍 Searchable dropdown
-song_choice = st.selectbox("Select a song you like:", song_list, index=None, placeholder="Start typing...")
-
-if song_choice:
-    st.subheader(f"🎶 Songs similar to **{song_choice}**:")
-    results = rec.recommend_content(song_choice)
-    st.dataframe(results, use_container_width=True)
-
-    st.subheader("💡 Hybrid Recommendations:")
-    hybrid = rec.hybrid_recommend(user_id=1, song_name=song_choice)
-    st.dataframe(hybrid, use_container_width=True)
-
-st.caption("Powered by Spotify Dataset + Streamlit + Python 🎧")
-
+rec = load_recommender()
+choices = list(rec.df[["artist", "song_name"]].itertuples(index=False, name=None))
+choice = st.selectbox("Select a track", choices, index=None,
+                      format_func=lambda track: f"{track[1]} — {track[0]}")
+if choice is not None:
+    st.dataframe(rec.recommend_content(choice[1], artist=choice[0]), width="stretch")
+st.caption("Similarity uses scaled danceability, energy, valence, and tempo from the included catalog sample.")
